@@ -1,0 +1,100 @@
+body{
+    margin:0;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    font-family:Arial, sans-serif;
+}
+
+#scoreBoard{
+    width:600px;
+    border:2px solid black;
+    margin-top:20px;
+    padding:10px;
+    box-sizing:border-box;
+    text-align:center;
+}
+
+#scoreBoard h2{
+    margin:0 0 10px 0;
+}
+
+#rankList{
+    margin:0;
+    padding-left:30px;
+    text-align:left;
+}
+
+
+#menu{
+    width:600px;
+    height:250px;
+    border:2px solid black;
+    margin-top:50px;
+
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+}
+
+#game{
+    touch-action:none;
+    display:none;
+
+    width:600px;
+    height:250px;
+    border:2px solid black;
+    position:relative;
+    overflow:hidden;
+    margin-top:50px;
+}
+
+#gameover{
+    display:none;
+
+    width:600px;
+    height:250px;
+    border:2px solid black;
+    margin-top:50px;
+
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+}
+
+button{
+    width:160px;
+    height:55px;
+    font-size:20px;
+    border:2px solid black;
+    border-radius:10px;
+    cursor:pointer;
+}
+
+#point{
+    position:absolute;
+    top:10px;
+    left:10px;
+    font-size:24px;
+    font-weight:bold;
+}
+
+#player{
+    width:40px;
+    height:40px;
+    background:red;
+
+    position:absolute;
+    left:60px;
+    bottom:0;
+}
+
+.enemy{
+    width:30px;
+    height:90px;
+    background:green;
+
+    position:absolute;
+    left:600px;
+}

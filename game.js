@@ -32,6 +32,7 @@ const game = document.getElementById("game");
 const startButton = document.getElementById("startButton");
 const restartButton = document.getElementById("restartButton");
 const rankList = document.getElementById("rankList");
+const finalScore = document.getElementById("finalScore");
 
 const GAME_WIDTH = 600;
 const GAME_HEIGHT = 250;
@@ -282,6 +283,8 @@ async function endGame(){
     }
 
     gameState = "gameover";
+
+    finalScore.textContent = "Score: " + Math.floor(score);
 
     await saveScore();
 

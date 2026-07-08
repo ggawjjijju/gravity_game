@@ -1,3 +1,27 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+import {
+    getFirestore,
+    collection,
+    addDoc,
+    getDocs,
+    query,
+    orderBy,
+    limit
+} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyB_q_wz2IMmKJ66web7eJI_O8kurf3Igfc",
+    authDomain: "gravitygame-ddcf7.firebaseapp.com",
+    projectId: "gravitygame-ddcf7",
+    storageBucket: "gravitygame-ddcf7.firebasestorage.app",
+    messagingSenderId: "119090045040",
+    appId: "1:119090045040:web:4cbb4cae957903aeef14b5",
+    measurementId: "G-REB9Y31N56"
+  };
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
 const player = document.getElementById("player");
 const point = document.getElementById("point");
 
@@ -7,7 +31,6 @@ const game = document.getElementById("game");
 
 const startButton = document.getElementById("startButton");
 const restartButton = document.getElementById("restartButton");
-
 const rankList = document.getElementById("rankList");
 
 const GAME_WIDTH = 600;
@@ -31,17 +54,15 @@ let gravityPower = 0.6;
 let score = 0;
 
 let enemySpeed = 5;
-let enemyMaxSpeed = 50;
+let enemyMaxSpeed = 13;
 
 let enemies = [];
 
-let Timer = 0;          // 전체 게임 시간
-let spawnTimer = 0;     // 적 생성 간격용
+let Timer = 0;
+let spawnTimer = 0;
 let spawnInterval = 90;
 
 let gameState = "menu";
-
-const SCORE_KEY = "gravityGameTopScores";
 
 startButton.addEventListener("click", startGame);
 restartButton.addEventListener("click", restartGame);
@@ -66,50 +87,48 @@ game.addEventListener("pointerdown", function(e){
     flipGravity();
 });
 
-function loadTopScores(){
-    const savedScores = localStorage.getItem(SCORE_KEY);
-
-    if(savedScores == null){
-        return [];
-    }
-
-    return JSON.parse(savedScores);
-}
-
-function saveScore(){
+async function saveScore(){
     const finalScore = Math.floor(score);
 
-    let scores = loadTopScores();
-
-    scores.push(finalScore);
-
-    scores.sort(function(a, b){
-        return b - a;
+    await addDoc(collection(db, "scores"), {
+        score: finalScore,
+        createdAt: Date.now()
     });
 
-    scores = scores.slice(0, 5);
-
-    localStorage.setItem(SCORE_KEY, JSON.stringify(scores));
-
-    updateScoreBoard();
+    await updateScoreBoard();
 }
 
-function updateScoreBoard(){
-    const scores = loadTopScores();
+async function updateScoreBoard(){
+    const q = query(
+        collection(db, "scores"),
+        orderBy("score", "desc"),
+        limit(5)
+    );
+
+    const snapshot = await getDocs(q);
 
     rankList.innerHTML = "";
 
-    for(let i = 0; i < 5; i++){
-        const li = document.createElement("li");
+    let count = 0;
 
-        if(scores[i] == undefined){
-            li.textContent = "-";
-        }
-        else{
-            li.textContent = scores[i];
-        }
+    snapshot.forEach(function(doc){
+        const data = doc.data();
+
+        const li = document.createElement("li");
+        li.textContent = data.score;
 
         rankList.appendChild(li);
+
+        count++;
+    });
+
+    while(count < 5){
+        const li = document.createElement("li");
+        li.textContent = "-";
+
+        rankList.appendChild(li);
+
+        count++;
     }
 }
 
@@ -139,7 +158,6 @@ function resetGame(){
     gravityDirection = -1;
 
     score = 0;
-
     enemySpeed = 5;
 
     Timer = 0;
@@ -147,7 +165,6 @@ function resetGame(){
     spawnInterval = 90;
 
     point.textContent = score;
-
     player.style.bottom = playerY + "px";
 
     clearEnemies();
@@ -188,7 +205,6 @@ function spawnEnemy(){
     enemyElement.style.left = enemy.x + "px";
 
     game.appendChild(enemyElement);
-
     enemies.push(enemy);
 }
 
@@ -218,8 +234,8 @@ function updateDifficulty(){
 
     spawnInterval = 90 - Math.floor(score / 100) * 5;
 
-    if(spawnInterval < 0){
-        spawnInterval = 0;
+    if(spawnInterval < 45){
+        spawnInterval = 45;
     }
 }
 
@@ -242,7 +258,10 @@ function moveEnemies(){
         if(enemy.x < -ENEMY_WIDTH){
             enemy.element.remove();
             enemies.splice(i, 1);
-            score += 30 + Math.floor(Timer / 250) * 10;
+
+            const bonus = 30 + Math.floor(Timer / 250) * 10;
+
+            score += bonus;
             updateScore();
         }
     }
@@ -257,14 +276,14 @@ function updateScore(){
     point.textContent = Math.floor(score);
 }
 
-function endGame(){
+async function endGame(){
     if(gameState == "gameover"){
         return;
     }
 
     gameState = "gameover";
 
-    saveScore();
+    await saveScore();
 
     game.style.display = "none";
     gameOver.style.display = "flex";

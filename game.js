@@ -54,7 +54,7 @@ let gravityPower = 0.6;
 let score = 0;
 
 let enemySpeed = 5;
-let enemyMaxSpeed = 13;
+let enemyMaxSpeed = 25;
 
 let enemies = [];
 
@@ -234,8 +234,8 @@ function updateDifficulty(){
 
     spawnInterval = 90 - Math.floor(score / 100) * 5;
 
-    if(spawnInterval < 45){
-        spawnInterval = 45;
+    if(spawnInterval < 0){
+        spawnInterval = 0;
     }
 }
 
